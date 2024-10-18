@@ -5,8 +5,10 @@ body {
 }
 
 a {
-  text-decoration: none;
-  color: blue;
+  color: black;
+}
+a:hover {
+  color: #2c7d7b;
 }
 
 .navbar {
@@ -29,8 +31,42 @@ a {
   margin: 0 auto; /* Cela va centrer .element dans la navbar */
 }
 
-.footer {
-  background-color: burlywood;
+footer {
+  display: flex;
+  justify-content: space-between;
+  background-color: #f9fafb;
+  padding: 20px 50px;
+  border-top: 1px solid #e1e1e1;
+  align-items: center; /* Centre les éléments verticalement */
+}
+footer .footer-section {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+footer .footer-section h4 {
+  color: #2c7d7b;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+footer .footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+footer .footer-section ul li {
+  margin-bottom: 5px;
+}
+footer .social-icons {
+  display: flex;
+  gap: 15px;
+}
+footer .social-icons li {
+  display: inline-block;
+}
+footer .social-icons li a img {
+  width: 30px;
+  height: 30px;
 }
 
 /*# sourceMappingURL=styles.css.map */

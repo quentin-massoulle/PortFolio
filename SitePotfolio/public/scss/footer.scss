@@ -1,3 +1,71 @@
-.footer{
-    background-color: burlywood;
+// SCSS pour le Footer
+footer {
+    display: flex;
+    justify-content: space-between;
+    background-color: #f9fafb; // Arrière-plan gris clair
+    padding: 20px 50px;
+    border-top: 1px solid #e1e1e1; // Bordure de séparation du footer
+    align-items: center; /* Centre les éléments verticalement */
+
+    .footer-section {
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        h4 {
+            color: #2c7d7b; // Couleur verte des titres
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+
+            li {
+                margin-bottom: 5px;
+
+            }
+        }
+    }
+
+    .social-icons {
+        display: flex;
+        gap: 15px; // Espacement entre les icônes
+
+        li {
+            display: inline-block;
+
+            a {
+                img {
+                    width: 30px; // Taille des icônes
+                    height: 30px;
+                }
+            }
+        }
+    }
+}
+
+
+// responsive
+@media only screen and (max-width:1700px) {
+}
+
+@media only screen and (max-width:1600px) {
+}
+
+@media only screen and (max-width:1440px) {
+}
+
+@media only screen and (max-width:1230px) {
+}
+
+@media only screen and (max-width:1024px) {
+}
+
+@media only screen and (max-width:781px) {
+}
+
+@media only screen and (max-width:580px) {
 }

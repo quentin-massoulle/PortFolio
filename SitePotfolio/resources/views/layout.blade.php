@@ -20,6 +20,15 @@
             </div>
         </div>
         @yield('content')
-        <div class="footer">footer</div>
+        <footer>
+            <div class="footer-section">
+                <h4>Mes Réseaux sociaux</h4>
+                <ul class="social-icons">
+                    <li><a href="#"><img src="linkedin-icon.png" alt="LinkedIn"></a></li>
+                    <li><a href="#"><img src="facebook-icon.png" alt="Facebook"></a></li>
+                    <li><a href="#"><img src="instagram-icon.png" alt="Instagram"></a></li>
+                </ul>
+            </div>
+        </footer>
     </body>
 </html>
