@@ -1,5 +1,4 @@
-# Utiliser l'image officielle PHP 8.2 avec FPM
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
@@ -15,21 +14,22 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     locales \
     zip \
-    jpegoptim \
-    optipng \
-    pngquant \
-    gifsicle \
+    jpegoptim optipng pngquant gifsicle \
     vim \
     unzip \
     git \
     curl \
     libonig-dev \
     libzip-dev \
-    libgd-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl gd \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libgd-dev 
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+#Mine
 
+# Install extensions
+RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+RUN docker-php-ext-configure gd --with-external-gd
+RUN docker-php-ext-install gd
 # Installer Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
