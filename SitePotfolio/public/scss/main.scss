@@ -1,0 +1,12 @@
+@charset "utf-8";
+@use 'sass:color';
+
+
+@use "./variables"; // variables communes à tout le site
+@use "./base"; // base (structure) des pages
+@use "./elements"; // éléments des pages, réutilisables
+@use "./navbar"; // barre de navigation
+@use "./footer"; // footer des pages
+
+
+
