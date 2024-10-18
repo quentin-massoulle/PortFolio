@@ -1,11 +1,9 @@
-
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ProjetLaravel
+    container_name: APP
     image: laravel_app
     volumes:
       - ./:/var/www/html
@@ -14,7 +12,7 @@ services:
 
   webserver:
     image: nginx:alpine
-    container_name: SiteWeb
+    container_name: nginx
     ports:
       - "8989:80"                            # Assurez-vous que les ports sont correctement formatés
     volumes:
