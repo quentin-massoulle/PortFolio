@@ -45,13 +45,13 @@ const handleClose = () => {
       </div>
     </div>
 
-    <!-- Écran LCD droit : Uniquement le descriptif -->
-    <div class="flex-1 lcd-blue scanlines rounded-xl border-4 border-slate-950 p-3.5 sm:p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden min-h-[440px]">
+    <!-- Écran LCD droit : Hauteur fixe et scroll interne sur le descriptif -->
+    <div class="flex-1 lcd-blue scanlines rounded-xl border-4 border-slate-950 p-3.5 sm:p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden h-[450px] max-h-[450px]">
       
       <!-- ÉTAT 1 : AUCUN PROJET SÉLECTIONNÉ (EN ATTENTE DE CLIC) -->
       <div
         v-if="!isOpen || !selectedProject"
-        class="flex-1 rounded-xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden"
+        class="h-full rounded-xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden"
       >
         <!-- Grille radar d'attente -->
         <div class="relative w-24 h-24 mb-4 rounded-full border-2 border-sky-500/40 flex items-center justify-center">
@@ -74,10 +74,10 @@ const handleClose = () => {
         </div>
       </div>
 
-      <!-- ÉTAT 2 : FICHE DESCRIPTIVE COMPLÈTE DU PROJET SÉLECTIONNÉ -->
+      <!-- ÉTAT 2 : FICHE DESCRIPTIVE COMPLÈTE AVEC SCROLL INTERNE -->
       <div
         v-else
-        class="flex-1 flex flex-col justify-between overflow-y-auto pokedex-scroll pr-1 animate-in fade-in duration-200"
+        class="h-full flex flex-col justify-between overflow-y-auto pokedex-scroll pr-1.5 animate-in fade-in duration-200"
       >
         <div>
           <!-- Ligne de titre : Numéro, Titre et Bouton Fermer -->

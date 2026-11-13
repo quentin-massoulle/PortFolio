@@ -130,7 +130,7 @@ onUnmounted(() => {
 
       <!-- Corps du Pokédex 4G : 
            Volet Gauche (Liste verticale défilante) | Centre (Molette 4G Sinnoh) | Volet Droit (Descriptif du projet) -->
-      <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative items-stretch">
+      <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative items-stretch lg:h-[590px]">
         
         <!-- VOLET GAUCHE : LISTE VERTICALE DES PROJETS AVEC SCROLL -->
         <div

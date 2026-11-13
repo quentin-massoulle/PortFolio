@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { sfx } from '../utils/audio'
 
 const props = defineProps({
@@ -25,18 +25,69 @@ const emit = defineEmits([
   'select-project',
   'dpad-up',
   'dpad-down',
-  'dpad-left',
-  'dpad-right',
   'action-a',
   'action-b'
 ])
 
-// Vue de l'écran de gauche : 'list' (liste des projets) ou 'trainer' (profil dresseur)
+// Vue de l'écran : 'list' ou 'trainer'
 const currentView = ref('list')
 
+// Dimensions fixes pour le positionnement au centre
+const ITEM_HEIGHT = 50 // Hauteur de la carte
+const GAP = 8 // Espace entre les cartes
+const STEP = ITEM_HEIGHT + GAP // 58px par pas
+const VIEWPORT_HEIGHT = 290 // Hauteur de la fenêtre visible
+
+// Index du projet sélectionné
+const selectedIndex = computed(() => {
+  const idx = props.projects.findIndex(p => p.id === props.selectedProject?.id)
+  return idx >= 0 ? idx : 0
+})
+
+// Décalage vertical calculé pour que l'élément sélectionné soit TOUJOURS au milieu
+const offsetY = computed(() => {
+  const centerViewport = VIEWPORT_HEIGHT / 2
+  const centerItem = ITEM_HEIGHT / 2
+  return centerViewport - (selectedIndex.value * STEP) - centerItem
+})
+
+// Classes de taille et perspective progressives : plus l'élément est loin du centre, plus il est petit
+const getItemClasses = (idx) => {
+  const dist = Math.abs(idx - selectedIndex.value)
+
+  if (dist === 0) {
+    // Élément sélectionné (au centre) : taille maximale
+    return 'w-full bg-slate-900 border-emerald-400 text-white shadow-[0_0_15px_rgba(52,211,153,0.5)] z-10 scale-100 opacity-100'
+  } else if (dist === 1) {
+    // Voisins directs (+/- 1) : légèrement rétrécis
+    return 'w-[88%] bg-emerald-950/90 border-emerald-900/80 hover:border-emerald-600 text-emerald-200 scale-[0.95] opacity-90 hover:opacity-100'
+  } else if (dist === 2) {
+    // Distance 2 (+/- 2) : encore plus étroits et plus petits
+    return 'w-[76%] bg-emerald-950/80 border-emerald-950 text-emerald-300/80 scale-[0.87] opacity-75 hover:opacity-95'
+  } else {
+    // Distance 3 ou plus : les plus petits
+    return 'w-[64%] bg-emerald-950/70 border-emerald-950/60 text-emerald-400/70 scale-[0.80] opacity-60 hover:opacity-85'
+  }
+}
+
+// Clic sur un projet : sélectionne et centre
 const onSelect = (project) => {
   sfx.playSelect()
   emit('select-project', project)
+}
+
+// Molette de la souris : défilement cran par cran
+let lastWheelTime = 0
+const handleWheel = (e) => {
+  const now = Date.now()
+  if (now - lastWheelTime < 140) return
+  lastWheelTime = now
+
+  if (e.deltaY > 0) {
+    emit('dpad-down')
+  } else if (e.deltaY < 0) {
+    emit('dpad-up')
+  }
 }
 
 const handleDpad = (dir) => {
@@ -56,10 +107,10 @@ const handleActionB = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-red-600 p-5 rounded-2xl md:rounded-r-none border-4 border-red-800 shadow-2xl">
+  <div class="flex flex-col h-full bg-red-600 p-4 sm:p-5 rounded-2xl md:rounded-r-none border-4 border-red-800 shadow-2xl">
     <!-- Cadre de l'écran principal (bords biseautés gris) -->
     <div class="relative bg-slate-200 border-4 border-slate-400 rounded-xl p-3 sm:p-4 shadow-inner flex flex-col flex-1">
-      <!-- 2 LEDs rouges + bascule de vue -->
+      <!-- 2 LEDs rouges + bascule Dresseur -->
       <div class="flex justify-between items-center mb-2 px-1">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-rose-600 border border-slate-600"></span>
@@ -79,82 +130,90 @@ const handleActionB = () => {
       <!-- Écran LCD Rétro Vert/Noir -->
       <div class="lcd-screen scanlines rounded-lg border-2 border-slate-800 p-3 sm:p-3.5 text-emerald-400 font-mono shadow-[inset_0_0_15px_rgba(0,0,0,0.8)] relative flex-1 flex flex-col overflow-hidden min-h-[380px]">
         
-        <!-- VUE 1 : LISTE DES PROJETS AVEC DÉFILEMENT VERTICAL -->
-        <div v-if="currentView === 'list'" class="flex flex-col h-full">
-          <!-- Bandeau titre de l'index -->
-          <div class="flex items-center justify-between border-b border-emerald-900/70 pb-2 mb-2 text-xs">
+        <!-- VUE 1 : ROULETTE VERTICALE POKÉDEX CENTRÉE & 100% VISIBLE -->
+        <div v-if="currentView === 'list'" class="flex flex-col h-full justify-between">
+          <!-- Bandeau supérieur -->
+          <div class="flex items-center justify-between border-b border-emerald-900/70 pb-1.5 mb-1.5 text-xs">
             <span class="font-pixel text-emerald-300 text-[10px]">
               LISTE DES ENTRÉES ({{ projects.length }})
             </span>
             <span class="text-[9px] font-pixel text-emerald-400/80 animate-pulse">
-              DÉFILEMENT ↕
+              ROULETTE 4G ↕
             </span>
           </div>
 
-          <!-- Indication pour le recruteur -->
-          <div class="bg-emerald-950/40 rounded px-2 py-1 mb-2 border border-emerald-900/40 text-[10px] font-tech text-emerald-200">
-            👉 Cliquez sur une ligne pour afficher sa fiche descriptive à droite.
-          </div>
-
-          <!-- LISTE VERTICALE DES PROJETS (LIGNES DÉFILANTES) -->
-          <div class="flex-1 overflow-y-auto pokedex-scroll space-y-1.5 pr-1 max-h-[290px]">
+          <!-- FENÊTRE DU CARROUSEL VERTICAL CENTRÉ (VIEWPORT 290px) -->
+          <div
+            @wheel.prevent="handleWheel"
+            class="relative w-full h-[290px] overflow-hidden rounded-md my-auto select-none"
+          >
+            <!-- RECTANGLE REPÈRE DU MILIEU (POUR GUIDER LA SÉLECTION) -->
             <div
-              v-for="project in projects"
-              :key="project.id"
-              @click="onSelect(project)"
-              class="group relative flex items-center justify-between p-2.5 rounded-md border transition cursor-pointer select-none"
-              :class="selectedProject?.id === project.id && isProjectOpen
-                ? 'bg-emerald-500/25 border-emerald-400 text-white shadow-[0_0_12px_rgba(52,211,153,0.35)]'
-                : 'bg-emerald-950/50 border-emerald-900/60 text-emerald-300 hover:bg-emerald-900/50 hover:border-emerald-500/50'"
+              class="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[54px] border-2 border-dashed border-emerald-500/40 rounded-lg pointer-events-none z-0 bg-emerald-500/5"
+            ></div>
+
+            <!-- PISTE DÉFILANTE QUI GLISSE VERS LE HAUT OU LE BAS -->
+            <div
+              class="transition-transform duration-350 ease-out will-change-transform py-1"
+              :style="{ transform: `translateY(${offsetY}px)` }"
             >
-              <!-- Côté gauche : Curseur, Numéro et Nom -->
-              <div class="flex items-center gap-2 min-w-0">
-                <!-- Curseur animé si sélectionné -->
-                <span
-                  class="font-pixel text-xs transition-transform"
-                  :class="selectedProject?.id === project.id && isProjectOpen
-                    ? 'text-emerald-300 translate-x-0.5 animate-pulse'
-                    : 'text-transparent group-hover:text-emerald-500/60'"
-                >
-                  ►
-                </span>
+              <div
+                v-for="(project, idx) in projects"
+                :key="project.id"
+                @click="onSelect(project)"
+                class="h-[50px] mb-2 px-3 rounded-lg border-2 flex items-center justify-between transition-all duration-300 cursor-pointer select-none mx-auto origin-center"
+                :class="getItemClasses(idx)"
+              >
+                <!-- Côté gauche : Curseur, Numéro et Titre (100% lisibles et nets) -->
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <!-- Curseur vert rétro ► -->
+                  <span
+                    class="font-pixel text-xs transition-transform"
+                    :class="idx === selectedIndex ? 'text-emerald-400 animate-pulse' : 'text-transparent'"
+                  >
+                    ►
+                  </span>
 
-                <!-- Icône / Émoji Pokéball -->
-                <span class="text-sm shrink-0">{{ project.preview }}</span>
+                  <!-- Émoji / Icône -->
+                  <span class="text-base shrink-0">{{ project.preview }}</span>
 
-                <!-- Numéro d'entrée -->
-                <span class="font-pixel text-[10px] text-emerald-400 shrink-0">
-                  {{ project.number }}
-                </span>
+                  <!-- Numéro d'entrée -->
+                  <span
+                    class="font-pixel text-[11px] font-bold shrink-0"
+                    :class="idx === selectedIndex ? 'text-emerald-300' : 'text-emerald-400'"
+                  >
+                    {{ project.number }}
+                  </span>
 
-                <!-- Titre du projet en ligne -->
-                <span class="font-bold text-xs truncate group-hover:text-white transition">
-                  {{ project.name }}
-                </span>
-              </div>
+                  <!-- Nom du projet -->
+                  <span class="text-xs font-bold truncate tracking-wide">
+                    {{ project.name }}
+                  </span>
+                </div>
 
-              <!-- Côté droit : Badge de type / statut -->
-              <div class="flex items-center gap-1.5 shrink-0 ml-2">
-                <span class="px-1.5 py-0.5 rounded text-[9px] font-pixel bg-emerald-900/80 text-emerald-200 border border-emerald-600/40">
-                  {{ project.type }}
-                </span>
-                <span
-                  v-if="selectedProject?.id === project.id && isProjectOpen"
-                  class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"
-                  title="Fiche ouverte"
-                ></span>
+                <!-- Côté droit : Badge de type -->
+                <div class="shrink-0 ml-2">
+                  <span
+                    class="px-2 py-0.5 rounded text-[9px] font-pixel border"
+                    :class="idx === selectedIndex
+                      ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-300 shadow'
+                      : 'bg-emerald-900/90 text-emerald-200 border-emerald-700'"
+                  >
+                    {{ project.type }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Pied de l'écran avec aide navigation -->
-          <div class="border-t border-emerald-900/70 pt-2 mt-2 flex justify-between items-center text-[9px] font-pixel text-emerald-400/80">
-            <span>CLAVIER : ⬆️ / ⬇️</span>
-            <span>CLIQUEZ POUR OUVRIR</span>
+          <div class="border-t border-emerald-900/70 pt-1.5 flex justify-between items-center text-[9px] font-pixel text-emerald-400/80">
+            <span>MOLETTE / ⬆️⬇️</span>
+            <span>ÉLÉMENT SÉLECTIONNÉ AU CENTRE</span>
           </div>
         </div>
 
-        <!-- VUE 2 : PROFIL DRESSEUR (ACCESSIBLE VIA LE BOUTON DRESSEUR) -->
+        <!-- VUE 2 : PROFIL DRESSEUR -->
         <div v-else class="flex flex-col h-full justify-between">
           <div>
             <div class="flex items-center justify-between border-b border-emerald-900/60 pb-2 mb-2">
@@ -219,38 +278,28 @@ const handleActionB = () => {
     <div class="flex items-center justify-between mt-5 px-3">
       <!-- D-Pad croix directionnelle -->
       <div class="relative w-28 h-28">
-        <!-- Bouton Haut (Projet précédent) -->
+        <!-- Bouton Haut -->
         <button
           @click="handleDpad('up')"
           class="absolute top-0 left-9 w-10 h-10 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-400 rounded-t flex items-center justify-center shadow-md border border-slate-700 cursor-pointer text-xs"
-          title="Projet précédent (Haut)"
+          title="Faire monter l'élément"
         >
           ▲
         </button>
-        <!-- Bouton Bas (Projet suivant) -->
+        <!-- Bouton Bas -->
         <button
           @click="handleDpad('down')"
           class="absolute bottom-0 left-9 w-10 h-10 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-400 rounded-b flex items-center justify-center shadow-md border border-slate-700 cursor-pointer text-xs"
-          title="Projet suivant (Bas)"
+          title="Faire descendre l'élément"
         >
           ▼
         </button>
-        <!-- Bouton Gauche (Onglet précédent) -->
-        <button
-          @click="handleDpad('left')"
-          class="absolute top-9 left-0 w-10 h-10 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-400 rounded-l flex items-center justify-center shadow-md border border-slate-700 cursor-pointer text-xs"
-          title="Onglet précédent (Gauche)"
-        >
+        <div class="absolute top-9 left-0 w-10 h-10 bg-slate-900 text-slate-600 rounded-l flex items-center justify-center border border-slate-700 pointer-events-none text-xs">
           ◀
-        </button>
-        <!-- Bouton Droite (Onglet suivant) -->
-        <button
-          @click="handleDpad('right')"
-          class="absolute top-9 right-0 w-10 h-10 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-400 rounded-r flex items-center justify-center shadow-md border border-slate-700 cursor-pointer text-xs"
-          title="Onglet suivant (Droite)"
-        >
+        </div>
+        <div class="absolute top-9 right-0 w-10 h-10 bg-slate-900 text-slate-600 rounded-r flex items-center justify-center border border-slate-700 pointer-events-none text-xs">
           ▶
-        </button>
+        </div>
         <!-- Centre fixe -->
         <div class="absolute top-9 left-9 w-10 h-10 bg-slate-900 flex items-center justify-center pointer-events-none">
           <div class="w-4 h-4 rounded-full bg-slate-950/80 border border-slate-800"></div>
@@ -259,7 +308,7 @@ const handleActionB = () => {
 
       <!-- Boutons d'action ronds A et B -->
       <div class="flex items-center gap-4">
-        <!-- Bouton B (Fermer descriptif / Annuler) -->
+        <!-- Bouton B (Fermer descriptif) -->
         <div class="flex flex-col items-center">
           <button
             @click="handleActionB"
@@ -286,4 +335,3 @@ const handleActionB = () => {
     </div>
   </div>
 </template>
-
