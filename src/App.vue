@@ -1,206 +1,200 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { pokedexData } from './data/pokedexData'
+import { sfx } from './utils/audio'
+import PokedexHeader from './components/PokedexHeader.vue'
+import TrainerScreen from './components/TrainerScreen.vue'
+import DataScreen from './components/DataScreen.vue'
 
-// Données réactives (JavaScript pur)
-const activeFilter = ref('Tous')
+// État réactif
+const isMuted = ref(sfx.muted)
+const activeTab = ref('projects')
+const selectedProject = ref(pokedexData.projects[0])
+const mobileView = ref('both') // 'trainer', 'data', ou 'both'
 
-const categories = ['Tous', 'Web App', 'Frontend', 'Design']
-
-const projects = ref([
-  {
-    id: 1,
-    title: 'Application E-Commerce',
-    description: 'Boutique en ligne interactive avec panier réactif et gestion des filtres.',
-    category: 'Web App',
-    tags: ['Vue 3', 'Tailwind', 'Pinia'],
-    link: '#'
-  },
-  {
-    id: 2,
-    title: 'Dashboard Analytique',
-    description: 'Tableau de bord de suivi de métriques avec graphiques dynamiques.',
-    category: 'Frontend',
-    tags: ['Vue.js', 'Vite', 'Charts'],
-    link: '#'
-  },
-  {
-    id: 3,
-    title: 'Système de Design UI',
-    description: 'Bibliothèque de composants modulaires et accessibles sous Tailwind CSS.',
-    category: 'Design',
-    tags: ['Design System', 'UI/UX'],
-    link: '#'
-  }
-])
-
-const skills = [
-  { name: 'Vue.js 3', level: 'Avancé' },
-  { name: 'JavaScript ES6+', level: 'Avancé' },
-  { name: 'Tailwind CSS', level: 'Avancé' },
-  { name: 'Vite', level: 'Intermédiaire' },
-  { name: 'Git & GitHub', level: 'Avancé' },
-  { name: 'API REST', level: 'Avancé' }
-]
-
-const likes = ref(0)
-const incrementLikes = () => {
-  likes.value++
+// Bascule du son 8-bit
+const toggleAudio = () => {
+  isMuted.value = sfx.toggleMute()
 }
 
-const filteredProjects = computed(() => {
-  if (activeFilter.value === 'Tous') return projects.value
-  return projects.value.filter(p => p.category === activeFilter.value)
+// Gestion des projets (Suivant / Précédent via D-Pad ou Clavier)
+const nextProject = () => {
+  const currentIndex = pokedexData.projects.findIndex(p => p.id === selectedProject.value.id)
+  const nextIndex = (currentIndex + 1) % pokedexData.projects.length
+  selectedProject.value = pokedexData.projects[nextIndex]
+}
+
+const prevProject = () => {
+  const currentIndex = pokedexData.projects.findIndex(p => p.id === selectedProject.value.id)
+  const prevIndex = (currentIndex - 1 + pokedexData.projects.length) % pokedexData.projects.length
+  selectedProject.value = pokedexData.projects[prevIndex]
+}
+
+// Navigation entre onglets (Gauche / Droite)
+const tabs = ['projects', 'stats', 'badges', 'contact']
+const nextTab = () => {
+  const currentIndex = tabs.indexOf(activeTab.value)
+  activeTab.value = tabs[(currentIndex + 1) % tabs.length]
+}
+
+const prevTab = () => {
+  const currentIndex = tabs.indexOf(activeTab.value)
+  activeTab.value = tabs[(currentIndex - 1 + tabs.length) % tabs.length]
+}
+
+// Bouton A (Ouvrir démo du projet sélectionné ou contacter)
+const onActionA = () => {
+  if (activeTab.value === 'projects' && selectedProject.value?.demoUrl) {
+    window.open(selectedProject.value.demoUrl, '_blank')
+  } else if (activeTab.value === 'contact') {
+    activeTab.value = 'projects'
+  } else {
+    activeTab.value = 'contact'
+  }
+}
+
+// Bouton B (Revenir aux projets)
+const onActionB = () => {
+  activeTab.value = 'projects'
+}
+
+// Réinitialiser la vue (clic sur la lentille)
+const resetPokedex = () => {
+  activeTab.value = 'projects'
+  selectedProject.value = pokedexData.projects[0]
+}
+
+// Prise en charge des touches du clavier pour une immersion totale
+const handleKeyDown = (e) => {
+  if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    nextProject()
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    prevProject()
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault()
+    nextTab()
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault()
+    prevTab()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-    <!-- Barre de navigation -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#" class="flex items-center gap-2 font-bold text-xl tracking-tight text-white hover:text-emerald-400 transition">
-          <span class="inline-block w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-          MonPortfolio
-        </a>
-        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-          <a href="#about" class="hover:text-emerald-400 transition">À propos</a>
-          <a href="#projets" class="hover:text-emerald-400 transition">Projets</a>
-          <a href="#skills" class="hover:text-emerald-400 transition">Compétences</a>
-          <a href="#contact" class="hover:text-emerald-400 transition">Contact</a>
-        </nav>
+  <div class="min-h-screen bg-neutral-950 text-slate-100 flex flex-col justify-between py-6 px-3 sm:px-6">
+    <!-- Conteneur Pokédex centré -->
+    <div class="max-w-6xl w-full mx-auto my-auto shadow-2xl rounded-3xl bg-red-700 border-4 border-red-950 relative overflow-hidden">
+      <!-- En-tête Pokédex (Lentille bleue clignotante, 3 LEDs, Son) -->
+      <PokedexHeader
+        :is-muted="isMuted"
+        @toggle-audio="toggleAudio"
+        @reset="resetPokedex"
+      />
+
+      <!-- Sélecteur d'écran sur mobile/tablette -->
+      <div class="flex lg:hidden bg-red-800 border-b-2 border-red-900 p-2 gap-2">
         <button
-          @click="incrementLikes"
-          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition cursor-pointer"
+          @click="mobileView = 'trainer'"
+          class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer"
+          :class="mobileView === 'trainer' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
         >
-          <span>👏 Encourager</span>
-          <span class="bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded-full font-bold">{{ likes }}</span>
+          👤 FICHE DRESSEUR
+        </button>
+        <button
+          @click="mobileView = 'data'"
+          class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer"
+          :class="mobileView === 'data' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
+        >
+          💻 DONNÉES POKÉDEX
         </button>
       </div>
-    </header>
 
-    <main class="flex-grow">
-      <!-- Section Hero -->
-      <section class="max-w-6xl mx-auto px-6 pt-24 pb-16 text-center md:text-left">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 mb-6">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          Vue 3 (JavaScript pur) + Tailwind CSS configuré
+      <!-- Corps du Pokédex : Double Écran avec charnière centrale -->
+      <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative">
+        <!-- Volet Gauche : Écran Principal & Fiche Dresseur -->
+        <div
+          class="lg:col-span-5 h-full"
+          :class="{
+            'hidden lg:block': mobileView === 'data',
+            'block': mobileView === 'trainer' || mobileView === 'both'
+          }"
+        >
+          <TrainerScreen
+            :trainer="pokedexData.trainer"
+            @dpad-up="nextProject"
+            @dpad-down="prevProject"
+            @dpad-left="prevTab"
+            @dpad-right="nextTab"
+            @action-a="onActionA"
+            @action-b="onActionB"
+          />
         </div>
-        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-          Développeur Frontend <br />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
-            Créatif & Passionné
-          </span>
-        </h1>
-        <p class="max-w-2xl text-lg text-slate-400 mb-8 leading-relaxed">
-          Bienvenue sur votre nouveau projet Vue.js ! Ce socle est optimisé avec Vite, Tailwind CSS et les meilleures pratiques du Composition API en pur JavaScript.
-        </p>
-        <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-          <a
-            href="#projets"
-            class="px-6 py-3 rounded-lg font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
-          >
-            Explorer les projets
-          </a>
-          <a
-            href="#contact"
-            class="px-6 py-3 rounded-lg font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
-          >
-            Me contacter
-          </a>
-        </div>
-      </section>
 
-      <!-- Section Compétences -->
-      <section id="skills" class="max-w-6xl mx-auto px-6 py-16 border-t border-slate-900">
-        <h2 class="text-2xl font-bold text-white mb-8">Compétences Techniques</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-          <div
-            v-for="skill in skills"
-            :key="skill.name"
-            class="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 transition text-center"
-          >
-            <p class="font-semibold text-white text-sm">{{ skill.name }}</p>
-            <p class="text-xs text-slate-500 mt-1">{{ skill.level }}</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section Projets avec filtres réactifs -->
-      <section id="projets" class="max-w-6xl mx-auto px-6 py-16 border-t border-slate-900">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h2 class="text-2xl font-bold text-white">Projets Récents</h2>
-            <p class="text-sm text-slate-400 mt-1">Filtrage réactif propulsé par Vue 3</p>
-          </div>
-          <!-- Filtres -->
-          <div class="flex flex-wrap gap-2">
-            <button
-              v-for="category in categories"
-              :key="category"
-              @click="activeFilter = category"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer',
-                activeFilter === category
-                  ? 'bg-emerald-500 text-slate-950 font-bold'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-              ]"
-            >
-              {{ category }}
-            </button>
+        <!-- Charnière centrale du Pokédex (visible sur grand écran) -->
+        <div class="hidden lg:flex lg:col-span-1 items-center justify-center relative">
+          <div class="w-8 h-[92%] bg-gradient-to-r from-red-900 via-red-800 to-red-950 rounded-lg border-2 border-red-950 shadow-2xl flex flex-col justify-around py-8">
+            <div class="w-full h-4 bg-red-950/60 border-y border-red-700"></div>
+            <div class="w-full h-4 bg-red-950/60 border-y border-red-700"></div>
+            <div class="w-full h-4 bg-red-950/60 border-y border-red-700"></div>
           </div>
         </div>
 
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            v-for="project in filteredProjects"
-            :key="project.id"
-            class="flex flex-col justify-between p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition"
-          >
-            <div>
-              <span class="text-xs font-semibold text-emerald-400 tracking-wider uppercase">
-                {{ project.category }}
-              </span>
-              <h3 class="text-lg font-bold text-white mt-2 mb-2">{{ project.title }}</h3>
-              <p class="text-sm text-slate-400 leading-relaxed">{{ project.description }}</p>
-            </div>
-            <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between">
-              <div class="flex flex-wrap gap-1.5">
-                <span
-                  v-for="tag in project.tags"
-                  :key="tag"
-                  class="px-2 py-0.5 text-[11px] font-medium bg-slate-800 text-slate-300 rounded"
-                >
-                  {{ tag }}
-                </span>
-              </div>
-              <a :href="project.link" class="text-sm font-semibold text-emerald-400 hover:underline">
-                Voir &rarr;
-              </a>
-            </div>
-          </div>
+        <!-- Volet Droit : Écran de Données & Onglets -->
+        <div
+          class="lg:col-span-6 h-full mt-4 lg:mt-0"
+          :class="{
+            'hidden lg:block': mobileView === 'trainer',
+            'block': mobileView === 'data' || mobileView === 'both'
+          }"
+        >
+          <DataScreen
+            v-model:active-tab="activeTab"
+            :projects="pokedexData.projects"
+            :selected-project="selectedProject"
+            :stats="pokedexData.stats"
+            :special-moves="pokedexData.specialMoves"
+            :badges="pokedexData.badges"
+            :contact="pokedexData.contact"
+            :trainer="pokedexData.trainer"
+            @select-project="(p) => selectedProject = p"
+          />
         </div>
-      </section>
+      </div>
 
-      <!-- Section Contact -->
-      <section id="contact" class="max-w-4xl mx-auto px-6 py-20 text-center">
-        <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800">
-          <h2 class="text-3xl font-bold text-white mb-4">Un projet en tête ?</h2>
-          <p class="text-slate-400 max-w-xl mx-auto mb-8 text-sm sm:text-base">
-            Vous pouvez personnaliser ce portfolio avec vos propres réalisations, ajouter de nouveaux composants ou brancher une API.
-          </p>
-          <a
-            href="mailto:contact@example.com"
-            class="inline-block px-8 py-3.5 rounded-xl font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition"
-          >
-            Démarrer la discussion
-          </a>
+      <!-- Barre inférieure Pokédex -->
+      <div class="px-6 py-3 bg-red-900/90 border-t-2 border-red-950 flex flex-wrap items-center justify-between text-xs text-red-200">
+        <div class="flex items-center gap-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="font-pixel text-[10px]">POKÉDEX VUE 3 CONNECTÉ</span>
         </div>
-      </section>
-    </main>
+        <div class="hidden sm:flex items-center gap-4 text-[11px] font-mono text-red-300">
+          <span>Navigation : ⬆️⬇️ Projets</span>
+          <span>⬅️➡️ Onglets</span>
+        </div>
+        <div class="text-[10px] font-pixel text-red-400">
+          © {{ new Date().getFullYear() }} {{ pokedexData.trainer.name }}
+        </div>
+      </div>
+    </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
-      <p>© {{ new Date().getFullYear() }} Mon Portfolio — Conçu avec Vue 3, Vite & Tailwind CSS</p>
-    </footer>
+    <!-- Instructions d'accessibilité / Note pour le recruteur sous le Pokédex -->
+    <div class="max-w-4xl mx-auto text-center mt-6 text-xs text-slate-400 space-y-1">
+      <p>
+        🎮 <strong class="text-slate-300">Astuce :</strong> Utilisez la croix directionnelle, les flèches de votre clavier ou cliquez sur les onglets pour explorer le portfolio.
+      </p>
+      <p class="text-slate-500">
+        Développé avec <strong>Vue.js 3</strong>, <strong>Tailwind CSS</strong> et <strong>Vite</strong>. Prêt à être déployé sur GitHub Pages, Vercel ou Netlify.
+      </p>
+    </div>
   </div>
 </template>

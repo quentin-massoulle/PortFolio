@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+@layer utilities {
+  .font-pixel {
+    font-family: 'Press Start 2P', monospace;
+  }
+  .font-retro {
+    font-family: 'VT323', monospace;
+  }
+  .font-tech {
+    font-family: 'Rajdhani', sans-serif;
+  }
+}
+
+/* Écran LCD rétro vert/noir */
+.lcd-screen {
+  background-color: #1e2920;
+  background-image: 
+    linear-gradient(rgba(16, 24, 18, 0.4) 50%, rgba(10, 15, 12, 0.7) 50%),
+    linear-gradient(90deg, rgba(34, 197, 94, 0.03), rgba(34, 197, 94, 0.01), rgba(34, 197, 94, 0.03));
+  background-size: 100% 4px, 4px 100%;
+}
+
+/* Écran digital bleu moderne */
+.lcd-blue {
+  background-color: #0b192c;
+  background-image: 
+    linear-gradient(rgba(15, 23, 42, 0.3) 50%, rgba(2, 6, 23, 0.6) 50%),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03), rgba(56, 189, 248, 0.01), rgba(56, 189, 248, 0.03));
+  background-size: 100% 4px, 4px 100%;
+}
+
+/* Lignes de balayage (scanlines) */
+.scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 3px;
+}
+
+/* Scrollbar discrète rétro */
+.pokedex-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.pokedex-scroll::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 4px;
+}
+.pokedex-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+.pokedex-scroll::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
