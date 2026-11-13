@@ -1,32 +1,47 @@
-# Portfolio - Vue.js 3 & Tailwind CSS
+# 🔴 Pokédex Portfolio 4G (Sinnoh) - Vue.js 3 & Tailwind CSS
 
-Projet **Vue.js pur** (JavaScript, sans TypeScript) avec **Vite** et **Tailwind CSS**.
+Portfolio interactif pour développeur inspiré du **Pokédex de la 4ème Génération (Sinnoh / Nintendo DS)**, développé en **Vue.js 3 pur** (Composition API) et **Tailwind CSS**.
 
-## 🚀 Démarrage rapide
+---
 
-### 1. Lancer le serveur de développement
+## ⚡ Caractéristiques du Pokédex 4G
+
+1. **Écran de gauche : Liste avec défilement vertical**
+   - Tous vos projets sont listés en lignes numérotées (`#001`, `#002`, `#003`, etc.).
+   - Défilement vertical fluide avec scrollbar intégrée.
+   - Sélection au clic, à la croix directionnelle (D-Pad) ou aux flèches du clavier.
+
+2. **Élément central : La Molette / Capteur 4G**
+   - Charnière centrale avec le grand cadran rotatif métallique et le cœur Pokéball tactile.
+   - Boutons `▲` / `▼` sur la molette pour faire défiler les projets.
+   - Bouton central tactile pour lancer l'analyse / ouvrir la fiche du projet sélectionné.
+   - Indicateur de position en temps réel (ex: `01/06`).
+
+3. **Écran de droite : Uniquement le descriptif du projet**
+   - Aucune surcharge : 100% dédié au descriptif du projet sélectionné.
+   - Apparaît au clic avec animation de balayage Pokédex.
+   - Présentation claire : Résumé, réalisations clés, stack technique.
+   - Boutons d'action pour le recruteur : **LANCER LA DÉMO**, **CODE GITHUB**, **TÉLÉCHARGER LE CV** et **CONTACTER**.
+
+4. **Sons rétro 8-bit & Navigation clavier**
+   - Bruitages 8-bit générés via Web Audio API (activable/désactivable avec le bouton MUTE).
+   - Touches `Haut` / `Bas` : Défiler les projets.
+   - Touche `Entrée` : Ouvrir la fiche / lancer la démo.
+   - Touche `Échap` : Fermer le descriptif.
+
+---
+
+## 🚀 Lancer le projet
+
 ```bash
 npm run dev
 ```
-L'application sera accessible sur [http://localhost:5173](http://localhost:5173).
 
-### 2. Construire pour la production
-```bash
-npm run build
-```
-Les fichiers compilés et minifiés seront générés dans le dossier `dist/`.
+Rendez-vous sur **http://localhost:5173** dans votre navigateur.
 
-### 3. Prévisualiser le build de production
-```bash
-npm run preview
-```
+---
 
-## 📁 Structure du projet
+## ✏️ Modifier vos projets et informations
 
-- `src/`
-  - `App.vue` : Composant racine avec sections portfolio, état réactif et Tailwind CSS.
-  - `main.js` : Point d'entrée de l'application Vue.
-  - `style.css` : Import et directives Tailwind CSS.
-  - `components/` : Dossier pour vos composants réutilisables.
-- `vite.config.js` : Configuration de Vite avec les plugins Vue et Tailwind.
-- `index.html` : Fichier HTML principal.
+Éditez simplement le fichier :  
+👉 **`src/data/pokedexData.js`**
