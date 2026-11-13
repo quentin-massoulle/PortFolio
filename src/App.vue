@@ -1,17 +1,22 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { pokedexData } from './data/pokedexData'
 import { sfx } from './utils/audio'
 import PokedexHeader from './components/PokedexHeader.vue'
 import ProjectListScreen from './components/ProjectListScreen.vue'
+import CenterWheel from './components/CenterWheel.vue'
 import DataScreen from './components/DataScreen.vue'
 
 // État réactif
 const isMuted = ref(sfx.muted)
-const activeTab = ref('projects')
 const selectedProject = ref(pokedexData.projects[0])
 const isProjectOpen = ref(false) // Le descriptif à droite apparaît uniquement au clic !
 const mobileView = ref('both') // 'projects', 'data', ou 'both'
+
+// Index du projet actuellement sélectionné
+const currentProjectIndex = computed(() => {
+  return pokedexData.projects.findIndex(p => p.id === selectedProject.value?.id)
+})
 
 // Bascule du son 8-bit
 const toggleAudio = () => {
@@ -22,9 +27,8 @@ const toggleAudio = () => {
 const handleSelectProject = (project) => {
   selectedProject.value = project
   isProjectOpen.value = true
-  activeTab.value = 'projects'
 
-  // Sur mobile, basculer automatiquement sur l'écran de droite pour lire le descriptif
+  // Sur mobile, basculer sur l'écran descriptif
   if (typeof window !== 'undefined' && window.innerWidth < 1024) {
     mobileView.value = 'data'
   }
@@ -35,7 +39,7 @@ const handleCloseProject = () => {
   isProjectOpen.value = false
 }
 
-// Navigation entre projets (Suivant / Précédent via D-Pad ou Clavier)
+// Navigation entre projets via D-Pad, Clavier ou Molette 4G
 const nextProject = () => {
   const currentIndex = pokedexData.projects.findIndex(p => p.id === selectedProject.value.id)
   const nextIndex = (currentIndex + 1) % pokedexData.projects.length
@@ -48,27 +52,12 @@ const prevProject = () => {
   selectedProject.value = pokedexData.projects[prevIndex]
 }
 
-// Navigation entre onglets (Gauche / Droite)
-const tabs = ['projects', 'stats', 'badges', 'contact']
-const nextTab = () => {
-  const currentIndex = tabs.indexOf(activeTab.value)
-  activeTab.value = tabs[(currentIndex + 1) % tabs.length]
-}
-
-const prevTab = () => {
-  const currentIndex = tabs.indexOf(activeTab.value)
-  activeTab.value = tabs[(currentIndex - 1 + tabs.length) % tabs.length]
-}
-
-// Bouton A (Ouvrir le descriptif ou lancer la démo)
+// Bouton A / Centre de la molette (Ouvrir ou lancer démo)
 const onActionA = () => {
   if (!isProjectOpen.value) {
     isProjectOpen.value = true
-    activeTab.value = 'projects'
-  } else if (activeTab.value === 'projects' && selectedProject.value?.demoUrl) {
+  } else if (selectedProject.value?.demoUrl) {
     window.open(selectedProject.value.demoUrl, '_blank')
-  } else if (activeTab.value === 'contact') {
-    activeTab.value = 'projects'
   }
 }
 
@@ -76,19 +65,16 @@ const onActionA = () => {
 const onActionB = () => {
   if (isProjectOpen.value) {
     isProjectOpen.value = false
-  } else {
-    activeTab.value = 'projects'
   }
 }
 
 // Réinitialiser la vue (clic sur la grande lentille bleue)
 const resetPokedex = () => {
-  activeTab.value = 'projects'
   isProjectOpen.value = false
   selectedProject.value = pokedexData.projects[0]
 }
 
-// Prise en charge des touches du clavier pour une immersion rétro totale
+// Prise en charge des touches du clavier pour une immersion rétro 4G
 const handleKeyDown = (e) => {
   if (e.key === 'ArrowUp') {
     e.preventDefault()
@@ -96,12 +82,6 @@ const handleKeyDown = (e) => {
   } else if (e.key === 'ArrowDown') {
     e.preventDefault()
     nextProject()
-  } else if (e.key === 'ArrowRight') {
-    e.preventDefault()
-    nextTab()
-  } else if (e.key === 'ArrowLeft') {
-    e.preventDefault()
-    prevTab()
   } else if (e.key === 'Escape') {
     handleCloseProject()
   } else if (e.key === 'Enter') {
@@ -120,9 +100,9 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-screen bg-neutral-950 text-slate-100 flex flex-col justify-between py-6 px-3 sm:px-6">
-    <!-- Conteneur Pokédex centré -->
+    <!-- Conteneur Pokédex 4G (Sinnoh) centré -->
     <div class="max-w-6xl w-full mx-auto my-auto shadow-2xl rounded-3xl bg-red-700 border-4 border-red-950 relative overflow-hidden">
-      <!-- En-tête Pokédex (Lentille bleue clignotante, 3 LEDs, Son) -->
+      <!-- En-tête Pokédex (Lentille bleue clignotante, 3 LEDs, Son 8-bit) -->
       <PokedexHeader
         :is-muted="isMuted"
         @toggle-audio="toggleAudio"
@@ -148,9 +128,11 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <!-- Corps du Pokédex : Double Écran avec charnière centrale -->
-      <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative">
-        <!-- Volet Gauche : Écran avec liste verticale des projets & scroll -->
+      <!-- Corps du Pokédex 4G : 
+           Volet Gauche (Liste verticale défilante) | Centre (Molette 4G Sinnoh) | Volet Droit (Descriptif du projet) -->
+      <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative items-stretch">
+        
+        <!-- VOLET GAUCHE : LISTE VERTICALE DES PROJETS AVEC SCROLL -->
         <div
           class="lg:col-span-5 h-full"
           :class="{
@@ -166,55 +148,50 @@ onUnmounted(() => {
             @select-project="handleSelectProject"
             @dpad-up="prevProject"
             @dpad-down="nextProject"
-            @dpad-left="prevTab"
-            @dpad-right="nextTab"
             @action-a="onActionA"
             @action-b="onActionB"
           />
         </div>
 
-        <!-- Charnière centrale du Pokédex (visible sur grand écran) -->
-        <div class="hidden lg:flex lg:col-span-1 items-center justify-center relative">
-          <div class="w-8 h-[92%] bg-gradient-to-r from-red-900 via-red-800 to-red-950 rounded-lg border-2 border-red-950 shadow-2xl flex flex-col justify-around py-8">
-            <div class="w-full h-4 bg-red-950/60 border-y border-red-700"></div>
-            <div class="w-full h-4 bg-red-950/60 border-y border-red-700"></div>
-            <div class="w-full h-4 bg-red-950/60 border-y border-red-700"></div>
-          </div>
+        <!-- ÉLÉMENT AU CENTRE : CHARNIÈRE & MOLETTE POKÉDEX 4G (SINNOH) -->
+        <div class="hidden lg:flex lg:col-span-2 items-center justify-center px-2 py-4">
+          <CenterWheel
+            :current-index="currentProjectIndex"
+            :total-projects="pokedexData.projects.length"
+            @prev="prevProject"
+            @next="nextProject"
+            @select="onActionA"
+          />
         </div>
 
-        <!-- Volet Droit : Écran de Descriptif (s'ouvre au clic) & Onglets -->
+        <!-- VOLET DROIT : UNIQUEMENT LE DESCRIPTIF DU PROJET (RÉVÉLÉ AU CLIC) -->
         <div
-          class="lg:col-span-6 h-full mt-4 lg:mt-0"
+          class="lg:col-span-5 h-full mt-4 lg:mt-0"
           :class="{
             'hidden lg:block': mobileView === 'projects',
             'block': mobileView === 'data' || mobileView === 'both'
           }"
         >
           <DataScreen
-            v-model:active-tab="activeTab"
-            :projects="pokedexData.projects"
             :selected-project="selectedProject"
-            :is-project-open="isProjectOpen"
-            :stats="pokedexData.stats"
-            :special-moves="pokedexData.specialMoves"
-            :badges="pokedexData.badges"
-            :contact="pokedexData.contact"
+            :is-open="isProjectOpen"
             :trainer="pokedexData.trainer"
+            :contact="pokedexData.contact"
             @close-project="handleCloseProject"
           />
         </div>
       </div>
 
-      <!-- Barre inférieure Pokédex -->
+      <!-- Barre inférieure Pokédex 4G -->
       <div class="px-6 py-3 bg-red-900/90 border-t-2 border-red-950 flex flex-wrap items-center justify-between text-xs text-red-200">
         <div class="flex items-center gap-3">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="font-pixel text-[10px]">POKÉDEX VUE 3 CONNECTÉ</span>
+          <span class="font-pixel text-[10px]">POKÉDEX 4G CONNECTÉ</span>
         </div>
         <div class="hidden sm:flex items-center gap-4 text-[11px] font-mono text-red-300">
-          <span>Navigation : ⬆️⬇️ Projets</span>
-          <span>Entrée / Clic : Ouvrir</span>
-          <span>Échap / B : Fermer</span>
+          <span>Navigation : Molette centrale ou ⬆️⬇️</span>
+          <span>Clic / Entrée : Ouvrir</span>
+          <span>Échap : Fermer</span>
         </div>
         <div class="text-[10px] font-pixel text-red-400">
           © {{ new Date().getFullYear() }} {{ pokedexData.trainer.name }}
@@ -222,10 +199,10 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Instructions d'accessibilité / Note pour le recruteur sous le Pokédex -->
+    <!-- Note d'aide pour le recruteur sous le Pokédex -->
     <div class="max-w-4xl mx-auto text-center mt-6 text-xs text-slate-400 space-y-1">
       <p>
-        🎮 <strong class="text-slate-300">Mode d'emploi :</strong> Cliquez sur un projet dans la liste verticale de gauche pour afficher son descriptif détaillé sur l'écran de droite.
+        🔴 <strong class="text-slate-300">Style Pokédex 4G :</strong> Utilisez la molette centrale, la liste verticale ou votre clavier pour sélectionner un projet et afficher son descriptif.
       </p>
       <p class="text-slate-500">
         Développé en <strong>Vue.js 3 pur</strong> (Composition API), <strong>Tailwind CSS</strong> et <strong>Vite</strong>.
