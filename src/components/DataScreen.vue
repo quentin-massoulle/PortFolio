@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { sfx } from '../utils/audio'
 import ProjectsTab from './ProjectsTab.vue'
 import StatsTab from './StatsTab.vue'
@@ -17,7 +17,11 @@ const props = defineProps({
   },
   selectedProject: {
     type: Object,
-    required: true
+    default: null
+  },
+  isProjectOpen: {
+    type: Boolean,
+    default: false
   },
   stats: {
     type: Array,
@@ -41,14 +45,19 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:active-tab', 'select-project'])
+const emit = defineEmits(['update:active-tab', 'close-project'])
 
-const tabs = [
-  { id: 'projects', label: 'PROJETS', icon: '🎒' },
+const tabs = computed(() => [
+  {
+    id: 'projects',
+    label: props.isProjectOpen ? 'DESCRIPTIF' : 'PROJETS',
+    icon: '🎒',
+    activeIndicator: props.isProjectOpen
+  },
   { id: 'stats', label: 'STATS', icon: '📊' },
   { id: 'badges', label: 'BADGES', icon: '🏅' },
   { id: 'contact', label: 'CONTACT', icon: '✉️' }
-]
+])
 
 const changeTab = (tabId) => {
   sfx.playSelect()
@@ -64,13 +73,18 @@ const changeTab = (tabId) => {
         v-for="tab in tabs"
         :key="tab.id"
         @click="changeTab(tab.id)"
-        class="py-2 px-1 sm:px-2 rounded-t-lg text-[10px] sm:text-xs font-pixel transition-all border-b-2 cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 truncate"
+        class="py-2 px-1 sm:px-2 rounded-t-lg text-[10px] sm:text-xs font-pixel transition-all border-b-2 cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 truncate relative"
         :class="activeTab === tab.id
           ? 'bg-slate-900 text-emerald-400 border-emerald-400 font-bold shadow-md -translate-y-0.5'
           : 'bg-red-800 hover:bg-red-700 text-red-200 border-red-950'"
       >
         <span>{{ tab.icon }}</span>
         <span class="hidden xs:inline">{{ tab.label }}</span>
+        <!-- Point vert si descriptif actif -->
+        <span
+          v-if="tab.id === 'projects' && isProjectOpen"
+          class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"
+        ></span>
       </button>
     </div>
 
@@ -78,9 +92,9 @@ const changeTab = (tabId) => {
     <div class="flex-1 lcd-blue scanlines rounded-xl border-4 border-slate-950 p-3 sm:p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden min-h-[460px]">
       <ProjectsTab
         v-if="activeTab === 'projects'"
-        :projects="projects"
         :selected-project="selectedProject"
-        @select-project="(p) => emit('select-project', p)"
+        :is-open="isProjectOpen"
+        @close-detail="emit('close-project')"
       />
 
       <StatsTab
@@ -108,7 +122,7 @@ const changeTab = (tabId) => {
         <button
           @click="changeTab('projects')"
           class="w-12 h-3.5 rounded bg-sky-500 hover:bg-sky-400 shadow cursor-pointer border border-sky-800"
-          title="Raccourci Projets"
+          title="Raccourci Descriptif Projet"
         ></button>
         <button
           @click="changeTab('contact')"

@@ -64,3 +64,4 @@ const onBadgeClick = (badge) => {
     </div>
   </div>
 </template>
+

@@ -111,6 +111,63 @@ export const pokedexData = {
       stack: ["Vue 3", "Chart.js", "Tailwind CSS", "Vite"],
       demoUrl: "https://github.com",
       githubUrl: "https://github.com"
+    },
+    {
+      id: "PROJ-004",
+      number: "#004",
+      name: "UI Component Library",
+      type: "DESIGN",
+      category: "UI/UX",
+      color: "purple",
+      preview: "⚡",
+      summary: "Bibliothèque de composants UI accessibles, typés et entièrement personnalisables sous Tailwind CSS.",
+      details: "Composants conçus selon les recommandations WAI-ARIA avec support clavier complet et variantes claires/sombres.",
+      highlights: [
+        "Accessibilité et navigation au clavier",
+        "Tests unitaires des composants",
+        "Documentation interactive Storybook"
+      ],
+      stack: ["Vue 3", "Tailwind CSS", "Storybook", "TypeScript"],
+      demoUrl: "https://github.com",
+      githubUrl: "https://github.com"
+    },
+    {
+      id: "PROJ-005",
+      number: "#005",
+      name: "Météo Radar Live",
+      type: "API",
+      category: "Web App",
+      color: "sky",
+      preview: "🌦️",
+      summary: "Application météo géolocalisée avec alertes instantanées, cartes interactives et prévisions à 7 jours.",
+      details: "Consommation d'API OpenWeather, mise en cache navigateur des requêtes et animations SVG dynamiques selon le climat.",
+      highlights: [
+        "Détection automatique de position",
+        "Affichage prédictif à 7 jours",
+        "Animations fluides du ciel et des nuages"
+      ],
+      stack: ["Vue 3", "OpenWeather API", "Leaflet", "Tailwind"],
+      demoUrl: "https://github.com",
+      githubUrl: "https://github.com"
+    },
+    {
+      id: "PROJ-006",
+      number: "#006",
+      name: "Task Master Pro",
+      type: "TOOL",
+      category: "Productivité",
+      color: "rose",
+      preview: "📋",
+      summary: "Gestionnaire de tâches de style Kanban avec glisser-déposer réactif et sauvegarde locale hors-ligne.",
+      details: "Support Drag & Drop HTML5 natif, organisation par colonnes de sprint et indicateurs de productivité visuels.",
+      highlights: [
+        "Glisser-déposer sans bibliothèque lourde",
+        "Persistance locale automatique",
+        "Statistiques de complétion hebdomadaire"
+      ],
+      stack: ["Vue 3", "HTML5 Drag&Drop", "LocalStorage", "Vite"],
+      demoUrl: "https://github.com",
+      githubUrl: "https://github.com"
     }
   ],
 

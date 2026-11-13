@@ -87,3 +87,4 @@ const onMoveClick = (move) => {
     </div>
   </div>
 </template>
+

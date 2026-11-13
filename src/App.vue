@@ -3,21 +3,39 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { pokedexData } from './data/pokedexData'
 import { sfx } from './utils/audio'
 import PokedexHeader from './components/PokedexHeader.vue'
-import TrainerScreen from './components/TrainerScreen.vue'
+import ProjectListScreen from './components/ProjectListScreen.vue'
 import DataScreen from './components/DataScreen.vue'
 
 // État réactif
 const isMuted = ref(sfx.muted)
 const activeTab = ref('projects')
 const selectedProject = ref(pokedexData.projects[0])
-const mobileView = ref('both') // 'trainer', 'data', ou 'both'
+const isProjectOpen = ref(false) // Le descriptif à droite apparaît uniquement au clic !
+const mobileView = ref('both') // 'projects', 'data', ou 'both'
 
 // Bascule du son 8-bit
 const toggleAudio = () => {
   isMuted.value = sfx.toggleMute()
 }
 
-// Gestion des projets (Suivant / Précédent via D-Pad ou Clavier)
+// Clic sur un projet dans la liste de gauche
+const handleSelectProject = (project) => {
+  selectedProject.value = project
+  isProjectOpen.value = true
+  activeTab.value = 'projects'
+
+  // Sur mobile, basculer automatiquement sur l'écran de droite pour lire le descriptif
+  if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+    mobileView.value = 'data'
+  }
+}
+
+// Fermer le descriptif de projet
+const handleCloseProject = () => {
+  isProjectOpen.value = false
+}
+
+// Navigation entre projets (Suivant / Précédent via D-Pad ou Clavier)
 const nextProject = () => {
   const currentIndex = pokedexData.projects.findIndex(p => p.id === selectedProject.value.id)
   const nextIndex = (currentIndex + 1) % pokedexData.projects.length
@@ -42,42 +60,52 @@ const prevTab = () => {
   activeTab.value = tabs[(currentIndex - 1 + tabs.length) % tabs.length]
 }
 
-// Bouton A (Ouvrir démo du projet sélectionné ou contacter)
+// Bouton A (Ouvrir le descriptif ou lancer la démo)
 const onActionA = () => {
-  if (activeTab.value === 'projects' && selectedProject.value?.demoUrl) {
+  if (!isProjectOpen.value) {
+    isProjectOpen.value = true
+    activeTab.value = 'projects'
+  } else if (activeTab.value === 'projects' && selectedProject.value?.demoUrl) {
     window.open(selectedProject.value.demoUrl, '_blank')
   } else if (activeTab.value === 'contact') {
     activeTab.value = 'projects'
-  } else {
-    activeTab.value = 'contact'
   }
 }
 
-// Bouton B (Revenir aux projets)
+// Bouton B (Fermer le descriptif)
 const onActionB = () => {
-  activeTab.value = 'projects'
+  if (isProjectOpen.value) {
+    isProjectOpen.value = false
+  } else {
+    activeTab.value = 'projects'
+  }
 }
 
-// Réinitialiser la vue (clic sur la lentille)
+// Réinitialiser la vue (clic sur la grande lentille bleue)
 const resetPokedex = () => {
   activeTab.value = 'projects'
+  isProjectOpen.value = false
   selectedProject.value = pokedexData.projects[0]
 }
 
-// Prise en charge des touches du clavier pour une immersion totale
+// Prise en charge des touches du clavier pour une immersion rétro totale
 const handleKeyDown = (e) => {
   if (e.key === 'ArrowUp') {
     e.preventDefault()
-    nextProject()
+    prevProject()
   } else if (e.key === 'ArrowDown') {
     e.preventDefault()
-    prevProject()
+    nextProject()
   } else if (e.key === 'ArrowRight') {
     e.preventDefault()
     nextTab()
   } else if (e.key === 'ArrowLeft') {
     e.preventDefault()
     prevTab()
+  } else if (e.key === 'Escape') {
+    handleCloseProject()
+  } else if (e.key === 'Enter') {
+    onActionA()
   }
 }
 
@@ -104,35 +132,40 @@ onUnmounted(() => {
       <!-- Sélecteur d'écran sur mobile/tablette -->
       <div class="flex lg:hidden bg-red-800 border-b-2 border-red-900 p-2 gap-2">
         <button
-          @click="mobileView = 'trainer'"
+          @click="mobileView = 'projects'"
           class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer"
-          :class="mobileView === 'trainer' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
+          :class="mobileView === 'projects' || mobileView === 'both' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
         >
-          👤 FICHE DRESSEUR
+          📋 LISTE DES PROJETS
         </button>
         <button
           @click="mobileView = 'data'"
-          class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer"
+          class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer relative"
           :class="mobileView === 'data' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
         >
-          💻 DONNÉES POKÉDEX
+          <span>💻 DESCRIPTIF</span>
+          <span v-if="isProjectOpen" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute top-2 right-3"></span>
         </button>
       </div>
 
       <!-- Corps du Pokédex : Double Écran avec charnière centrale -->
       <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative">
-        <!-- Volet Gauche : Écran Principal & Fiche Dresseur -->
+        <!-- Volet Gauche : Écran avec liste verticale des projets & scroll -->
         <div
           class="lg:col-span-5 h-full"
           :class="{
             'hidden lg:block': mobileView === 'data',
-            'block': mobileView === 'trainer' || mobileView === 'both'
+            'block': mobileView === 'projects' || mobileView === 'both'
           }"
         >
-          <TrainerScreen
+          <ProjectListScreen
+            :projects="pokedexData.projects"
+            :selected-project="selectedProject"
+            :is-project-open="isProjectOpen"
             :trainer="pokedexData.trainer"
-            @dpad-up="nextProject"
-            @dpad-down="prevProject"
+            @select-project="handleSelectProject"
+            @dpad-up="prevProject"
+            @dpad-down="nextProject"
             @dpad-left="prevTab"
             @dpad-right="nextTab"
             @action-a="onActionA"
@@ -149,11 +182,11 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- Volet Droit : Écran de Données & Onglets -->
+        <!-- Volet Droit : Écran de Descriptif (s'ouvre au clic) & Onglets -->
         <div
           class="lg:col-span-6 h-full mt-4 lg:mt-0"
           :class="{
-            'hidden lg:block': mobileView === 'trainer',
+            'hidden lg:block': mobileView === 'projects',
             'block': mobileView === 'data' || mobileView === 'both'
           }"
         >
@@ -161,12 +194,13 @@ onUnmounted(() => {
             v-model:active-tab="activeTab"
             :projects="pokedexData.projects"
             :selected-project="selectedProject"
+            :is-project-open="isProjectOpen"
             :stats="pokedexData.stats"
             :special-moves="pokedexData.specialMoves"
             :badges="pokedexData.badges"
             :contact="pokedexData.contact"
             :trainer="pokedexData.trainer"
-            @select-project="(p) => selectedProject = p"
+            @close-project="handleCloseProject"
           />
         </div>
       </div>
@@ -179,7 +213,8 @@ onUnmounted(() => {
         </div>
         <div class="hidden sm:flex items-center gap-4 text-[11px] font-mono text-red-300">
           <span>Navigation : ⬆️⬇️ Projets</span>
-          <span>⬅️➡️ Onglets</span>
+          <span>Entrée / Clic : Ouvrir</span>
+          <span>Échap / B : Fermer</span>
         </div>
         <div class="text-[10px] font-pixel text-red-400">
           © {{ new Date().getFullYear() }} {{ pokedexData.trainer.name }}
@@ -190,10 +225,10 @@ onUnmounted(() => {
     <!-- Instructions d'accessibilité / Note pour le recruteur sous le Pokédex -->
     <div class="max-w-4xl mx-auto text-center mt-6 text-xs text-slate-400 space-y-1">
       <p>
-        🎮 <strong class="text-slate-300">Astuce :</strong> Utilisez la croix directionnelle, les flèches de votre clavier ou cliquez sur les onglets pour explorer le portfolio.
+        🎮 <strong class="text-slate-300">Mode d'emploi :</strong> Cliquez sur un projet dans la liste verticale de gauche pour afficher son descriptif détaillé sur l'écran de droite.
       </p>
       <p class="text-slate-500">
-        Développé avec <strong>Vue.js 3</strong>, <strong>Tailwind CSS</strong> et <strong>Vite</strong>. Prêt à être déployé sur GitHub Pages, Vercel ou Netlify.
+        Développé en <strong>Vue.js 3 pur</strong> (Composition API), <strong>Tailwind CSS</strong> et <strong>Vite</strong>.
       </p>
     </div>
   </div>
