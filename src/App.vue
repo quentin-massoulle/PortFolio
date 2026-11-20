@@ -1,27 +1,18 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { pokedexData } from './data/pokedexData'
-import { sfx } from './utils/audio'
-import PokedexHeader from './components/PokedexHeader.vue'
 import ProjectListScreen from './components/ProjectListScreen.vue'
-import CenterWheel from './components/CenterWheel.vue'
 import DataScreen from './components/DataScreen.vue'
 
 // État réactif
-const isMuted = ref(sfx.muted)
 const selectedProject = ref(pokedexData.projects[0])
-const isProjectOpen = ref(false) // Le descriptif à droite apparaît uniquement au clic !
+const isProjectOpen = ref(true) // Premier projet ouvert par défaut au chargement
 const mobileView = ref('both') // 'projects', 'data', ou 'both'
 
 // Index du projet actuellement sélectionné
 const currentProjectIndex = computed(() => {
   return pokedexData.projects.findIndex(p => p.id === selectedProject.value?.id)
 })
-
-// Bascule du son 8-bit
-const toggleAudio = () => {
-  isMuted.value = sfx.toggleMute()
-}
 
 // Clic sur un projet dans la liste de gauche
 const handleSelectProject = (project) => {
@@ -82,8 +73,6 @@ const handleKeyDown = (e) => {
   } else if (e.key === 'ArrowDown') {
     e.preventDefault()
     nextProject()
-  } else if (e.key === 'Escape') {
-    handleCloseProject()
   } else if (e.key === 'Enter') {
     onActionA()
   }
@@ -100,37 +89,10 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-screen bg-neutral-950 text-slate-100 flex flex-col justify-center items-center py-1.5 sm:py-3 px-2 sm:px-4">
-    <!-- Conteneur Pokédex 4G (Sinnoh) centré, compact et resserré -->
-    <div class="max-w-[720px] w-full mx-auto my-auto shadow-2xl rounded-xl sm:rounded-2xl bg-red-700 border-2 sm:border-4 border-red-950 relative overflow-hidden">
-      <!-- En-tête Pokédex (Lentille bleue clignotante, 3 LEDs, Son 8-bit) -->
-      <PokedexHeader
-        :is-muted="isMuted"
-        @toggle-audio="toggleAudio"
-        @reset="resetPokedex"
-      />
-
-      <!-- Sélecteur d'écran sur mobile/tablette -->
-      <div class="flex lg:hidden bg-red-800 border-b-2 border-red-900 p-1.5 gap-1.5">
-        <button
-          @click="mobileView = 'projects'"
-          class="flex-1 py-1 px-2.5 rounded text-[10px] font-pixel transition cursor-pointer"
-          :class="mobileView === 'projects' || mobileView === 'both' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
-        >
-          📋 LISTE DES PROJETS
-        </button>
-        <button
-          @click="mobileView = 'data'"
-          class="flex-1 py-1 px-2.5 rounded text-[10px] font-pixel transition cursor-pointer relative"
-          :class="mobileView === 'data' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
-        >
-          <span>💻 DESCRIPTIF</span>
-          <span v-if="isProjectOpen" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping absolute top-1.5 right-2.5"></span>
-        </button>
-      </div>
-
-      <!-- Corps du Pokédex 4G : 
-           Volet Gauche (1fr) | Charnière étroite (auto) | Volet Droit (1fr) -->
-      <div class="p-1.5 sm:p-2 grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-0 relative items-stretch">
+    <!-- Conteneur Pokédex 4G (Sinnoh) centré, taille comme avant -->
+    <div class="max-w-[820px] w-full mx-auto my-auto shadow-2xl rounded-xl sm:rounded-2xl bg-red-700 border-2 sm:border-4 border-red-950 relative overflow-hidden">
+      <!-- Corps du Pokédex 4G : Volet Gauche | Volet Droit -->
+      <div class="p-1.5 sm:p-2 pb-2 sm:pb-3 grid grid-cols-1 lg:grid-cols-2 gap-2 relative items-stretch">
         
         <!-- VOLET GAUCHE : LISTE VERTICALE DES PROJETS AVEC SCROLL -->
         <div
@@ -152,17 +114,6 @@ onUnmounted(() => {
           />
         </div>
 
-        <!-- ÉLÉMENT AU CENTRE : CHARNIÈRE & MOLETTE POKÉDEX 4G RESSERRÉE -->
-        <div class="hidden lg:flex w-13 shrink-0 items-center justify-center px-0 py-1">
-          <CenterWheel
-            :current-index="currentProjectIndex"
-            :total-projects="pokedexData.projects.length"
-            @prev="prevProject"
-            @next="nextProject"
-            @select="onActionA"
-          />
-        </div>
-
         <!-- VOLET DROIT : UNIQUEMENT LE DESCRIPTIF DU PROJET (RÉVÉLÉ AU CLIC) -->
         <div
           class="h-full min-w-0 mt-2 lg:mt-0"
@@ -180,32 +131,6 @@ onUnmounted(() => {
           />
         </div>
       </div>
-
-      <!-- Barre inférieure Pokédex 4G -->
-      <div class="px-3 sm:px-4 py-1.5 bg-red-900/90 border-t-2 border-red-950 flex flex-wrap items-center justify-between text-[8px] sm:text-[9px] text-red-200">
-        <div class="flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="font-pixel text-[8px] sm:text-[9px]">POKÉDEX 4G CONNECTÉ</span>
-        </div>
-        <div class="hidden sm:flex items-center gap-3 font-mono text-red-300 text-[9px] sm:text-[10px]">
-          <span>Navigation : Molette ou ⬆️⬇️</span>
-          <span>Clic / Entrée : Ouvrir</span>
-          <span>Échap : Fermer</span>
-        </div>
-        <div class="text-[8px] sm:text-[9px] font-pixel text-red-400">
-          © {{ new Date().getFullYear() }} {{ pokedexData.trainer.name }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Note d'aide pour le recruteur sous le Pokédex -->
-    <div class="max-w-xl mx-auto text-center mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 space-y-0.5">
-      <p>
-        🔴 <strong class="text-slate-300">Style Pokédex 4G :</strong> Utilisez la molette centrale, la liste verticale ou votre clavier pour sélectionner un projet et afficher son descriptif.
-      </p>
-      <p class="text-slate-500">
-        Développé en <strong>Vue.js 3 pur</strong> (Composition API), <strong>Tailwind CSS</strong> et <strong>Vite</strong>.
-      </p>
     </div>
   </div>
 </template>

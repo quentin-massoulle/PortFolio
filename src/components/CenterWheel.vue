@@ -1,6 +1,4 @@
 <script setup>
-import { sfx } from '../utils/audio'
-
 const props = defineProps({
   currentIndex: {
     type: Number,
@@ -15,17 +13,14 @@ const props = defineProps({
 const emit = defineEmits(['prev', 'next', 'select'])
 
 const handleUp = () => {
-  sfx.playBeep(480, 0.04)
   emit('prev')
 }
 
 const handleDown = () => {
-  sfx.playBeep(420, 0.04)
   emit('next')
 }
 
 const handleCenter = () => {
-  sfx.playSelect()
   emit('select')
 }
 </script>
@@ -63,24 +58,6 @@ const handleCenter = () => {
           ▼
         </button>
 
-        <!-- Cœur central Pokéball tactile 4G cliquable -->
-        <button
-          @click="handleCenter"
-          class="relative w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden border border-slate-950 shadow-[0_0_8px_rgba(0,0,0,0.8)] active:scale-95 transition-transform cursor-pointer flex flex-col group/btn"
-          title="Scanner Pokédex 4G (Ouvrir le projet)"
-        >
-          <!-- Moitié supérieure rouge -->
-          <div class="w-full h-1/2 bg-gradient-to-b from-red-500 to-red-600 group-hover/btn:brightness-110"></div>
-          <!-- Ligne de séparation noire -->
-          <div class="w-full h-0.5 bg-slate-950"></div>
-          <!-- Moitié inférieure blanche -->
-          <div class="w-full h-1/2 bg-gradient-to-b from-slate-100 to-slate-200 group-hover/btn:brightness-110"></div>
-
-          <!-- Bouton blanc au centre de la Pokéball avec voyant lumineux -->
-          <div class="absolute inset-0 m-auto w-3 h-3 rounded-full bg-white border border-slate-950 flex items-center justify-center shadow">
-            <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_4px_rgba(34,211,238,0.9)] animate-pulse"></div>
-          </div>
-        </button>
       </div>
 
       <!-- Indicateur de position (ex: 01 / 06) sous la molette -->

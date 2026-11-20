@@ -1,17 +1,7 @@
 <script setup>
-import { sfx } from '../utils/audio'
-
-defineProps({
-  isMuted: {
-    type: Boolean,
-    default: true
-  }
-})
-
-const emit = defineEmits(['toggle-audio', 'reset'])
+const emit = defineEmits(['reset'])
 
 const handleLensClick = () => {
-  sfx.playPokedexCry()
   emit('reset')
 }
 </script>
@@ -38,26 +28,6 @@ const handleLensClick = () => {
         <span class="w-2.5 h-2.5 rounded-full bg-rose-500 border border-red-950 shadow-[0_0_6px_rgba(244,63,94,0.9)] animate-ping" style="animation-duration: 3s;"></span>
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-950 shadow-[0_0_6px_rgba(251,191,36,0.9)]"></span>
         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 border border-emerald-950 shadow-[0_0_6px_rgba(52,211,153,0.9)]"></span>
-      </div>
-    </div>
-
-    <!-- Contrôles du coin droit : Audio & statut -->
-    <div class="flex items-center gap-2">
-      <!-- Bouton Son Rétro 8-bit -->
-      <button
-        @click="emit('toggle-audio')"
-        class="flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] font-pixel border transition cursor-pointer"
-        :class="isMuted 
-          ? 'bg-red-900/60 border-red-950 text-red-200 hover:bg-red-800' 
-          : 'bg-emerald-500 border-emerald-300 text-slate-950 font-bold shadow-[0_0_8px_rgba(16,185,129,0.5)]'"
-        :title="isMuted ? 'Activer le son 8-bit' : 'Couper le son'"
-      >
-        <span>{{ isMuted ? '🔇 MUTE' : '🔊 8-BIT' }}</span>
-      </button>
-
-      <!-- Badge modèle Pokédex -->
-      <div class="hidden sm:block px-2 py-0.5 bg-red-900/80 border border-red-950 rounded text-[8px] font-pixel text-red-200">
-        MODEL: PK-VUE3
       </div>
     </div>
   </div>

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { sfx } from '../utils/audio'
 
 const props = defineProps({
   projects: {
@@ -69,7 +68,6 @@ const getItemClasses = (idx) => {
 
 // Clic sur un projet : sélectionne et centre
 const onSelect = (project) => {
-  sfx.playSelect()
   emit('select-project', project)
 }
 
@@ -85,21 +83,6 @@ const handleWheel = (e) => {
   } else if (e.deltaY < 0) {
     emit('dpad-up')
   }
-}
-
-const handleDpad = (dir) => {
-  sfx.playBeep(320, 0.04)
-  emit(`dpad-${dir}`)
-}
-
-const handleActionA = () => {
-  sfx.playSelect()
-  emit('action-a')
-}
-
-const handleActionB = () => {
-  sfx.playDamage()
-  emit('action-b')
 }
 </script>
 
@@ -203,7 +186,7 @@ const handleActionB = () => {
       <!-- Bas du cadre écran : haut-parleur et bouton rouge -->
       <div class="flex items-center justify-between mt-1.5 px-0.5">
         <button
-          @click="handleActionA"
+          @click="emit('action-a')"
           class="w-4 h-4 rounded-full bg-rose-600 border border-slate-700 shadow hover:bg-rose-500 cursor-pointer"
           title="Bouton Diagnostic"
         ></button>
@@ -212,66 +195,6 @@ const handleActionB = () => {
           <div class="h-0.5 bg-slate-600 rounded"></div>
           <div class="h-0.5 bg-slate-600 rounded"></div>
           <div class="h-0.5 bg-slate-600 rounded"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contrôles physiques inférieurs : D-Pad & Boutons A/B -->
-    <div class="flex items-center justify-between mt-2 px-1">
-      <!-- D-Pad croix directionnelle -->
-      <div class="relative w-16 h-16">
-        <!-- Bouton Haut -->
-        <button
-          @click="handleDpad('up')"
-          class="absolute top-0 left-5.5 w-5.5 h-5.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-400 rounded-t flex items-center justify-center shadow border border-slate-700 cursor-pointer text-[8px]"
-          title="Faire monter l'élément"
-        >
-          ▲
-        </button>
-        <!-- Bouton Bas -->
-        <button
-          @click="handleDpad('down')"
-          class="absolute bottom-0 left-5.5 w-5.5 h-5.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-slate-400 rounded-b flex items-center justify-center shadow border border-slate-700 cursor-pointer text-[8px]"
-          title="Faire descendre l'élément"
-        >
-          ▼
-        </button>
-        <div class="absolute top-5.5 left-0 w-5.5 h-5.5 bg-slate-900 text-slate-600 rounded-l flex items-center justify-center border border-slate-700 pointer-events-none text-[8px]">
-          ◀
-        </div>
-        <div class="absolute top-5.5 right-0 w-5.5 h-5.5 bg-slate-900 text-slate-600 rounded-r flex items-center justify-center border border-slate-700 pointer-events-none text-[8px]">
-          ▶
-        </div>
-        <!-- Centre fixe -->
-        <div class="absolute top-5.5 left-5.5 w-5.5 h-5.5 bg-slate-900 flex items-center justify-center pointer-events-none">
-          <div class="w-2 h-2 rounded-full bg-slate-950/80 border border-slate-800"></div>
-        </div>
-      </div>
-
-      <!-- Boutons d'action ronds A et B -->
-      <div class="flex items-center gap-2.5">
-        <!-- Bouton B (Fermer descriptif) -->
-        <div class="flex flex-col items-center">
-          <button
-            @click="handleActionB"
-            class="w-7.5 h-7.5 rounded-full bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-pixel text-[10px] font-bold border-2 border-amber-900 shadow-md flex items-center justify-center cursor-pointer"
-            title="Bouton B : Fermer le descriptif"
-          >
-            B
-          </button>
-          <span class="text-[7px] font-pixel text-red-200 mt-0.5">FERMER</span>
-        </div>
-
-        <!-- Bouton A (Ouvrir / Valider sélection) -->
-        <div class="flex flex-col items-center">
-          <button
-            @click="handleActionA"
-            class="w-7.5 h-7.5 rounded-full bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 font-pixel text-[10px] font-bold border-2 border-cyan-800 shadow-md flex items-center justify-center cursor-pointer"
-            title="Bouton A : Ouvrir la fiche"
-          >
-            A
-          </button>
-          <span class="text-[7px] font-pixel text-red-200 mt-0.5">OUVRIR</span>
         </div>
       </div>
     </div>
