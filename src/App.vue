@@ -99,9 +99,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-950 text-slate-100 flex flex-col justify-between py-6 px-3 sm:px-6">
-    <!-- Conteneur Pokédex 4G (Sinnoh) centré -->
-    <div class="max-w-6xl w-full mx-auto my-auto shadow-2xl rounded-3xl bg-red-700 border-4 border-red-950 relative overflow-hidden">
+  <div class="min-h-screen bg-neutral-950 text-slate-100 flex flex-col justify-center items-center py-1.5 sm:py-3 px-2 sm:px-4">
+    <!-- Conteneur Pokédex 4G (Sinnoh) centré, compact et resserré -->
+    <div class="max-w-[720px] w-full mx-auto my-auto shadow-2xl rounded-xl sm:rounded-2xl bg-red-700 border-2 sm:border-4 border-red-950 relative overflow-hidden">
       <!-- En-tête Pokédex (Lentille bleue clignotante, 3 LEDs, Son 8-bit) -->
       <PokedexHeader
         :is-muted="isMuted"
@@ -110,31 +110,31 @@ onUnmounted(() => {
       />
 
       <!-- Sélecteur d'écran sur mobile/tablette -->
-      <div class="flex lg:hidden bg-red-800 border-b-2 border-red-900 p-2 gap-2">
+      <div class="flex lg:hidden bg-red-800 border-b-2 border-red-900 p-1.5 gap-1.5">
         <button
           @click="mobileView = 'projects'"
-          class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer"
+          class="flex-1 py-1 px-2.5 rounded text-[10px] font-pixel transition cursor-pointer"
           :class="mobileView === 'projects' || mobileView === 'both' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
         >
           📋 LISTE DES PROJETS
         </button>
         <button
           @click="mobileView = 'data'"
-          class="flex-1 py-2 px-3 rounded-lg text-xs font-pixel transition cursor-pointer relative"
+          class="flex-1 py-1 px-2.5 rounded text-[10px] font-pixel transition cursor-pointer relative"
           :class="mobileView === 'data' ? 'bg-slate-900 text-emerald-400 font-bold' : 'bg-red-900/60 text-red-200'"
         >
           <span>💻 DESCRIPTIF</span>
-          <span v-if="isProjectOpen" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute top-2 right-3"></span>
+          <span v-if="isProjectOpen" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping absolute top-1.5 right-2.5"></span>
         </button>
       </div>
 
       <!-- Corps du Pokédex 4G : 
-           Volet Gauche (Liste verticale défilante) | Centre (Molette 4G Sinnoh) | Volet Droit (Descriptif du projet) -->
-      <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-0 relative items-stretch lg:h-[590px]">
+           Volet Gauche (1fr) | Charnière étroite (auto) | Volet Droit (1fr) -->
+      <div class="p-1.5 sm:p-2 grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-0 relative items-stretch">
         
         <!-- VOLET GAUCHE : LISTE VERTICALE DES PROJETS AVEC SCROLL -->
         <div
-          class="lg:col-span-5 h-full"
+          class="h-full min-w-0"
           :class="{
             'hidden lg:block': mobileView === 'data',
             'block': mobileView === 'projects' || mobileView === 'both'
@@ -144,7 +144,6 @@ onUnmounted(() => {
             :projects="pokedexData.projects"
             :selected-project="selectedProject"
             :is-project-open="isProjectOpen"
-            :trainer="pokedexData.trainer"
             @select-project="handleSelectProject"
             @dpad-up="prevProject"
             @dpad-down="nextProject"
@@ -153,8 +152,8 @@ onUnmounted(() => {
           />
         </div>
 
-        <!-- ÉLÉMENT AU CENTRE : CHARNIÈRE & MOLETTE POKÉDEX 4G (SINNOH) -->
-        <div class="hidden lg:flex lg:col-span-2 items-center justify-center px-2 py-4">
+        <!-- ÉLÉMENT AU CENTRE : CHARNIÈRE & MOLETTE POKÉDEX 4G RESSERRÉE -->
+        <div class="hidden lg:flex w-13 shrink-0 items-center justify-center px-0 py-1">
           <CenterWheel
             :current-index="currentProjectIndex"
             :total-projects="pokedexData.projects.length"
@@ -166,7 +165,7 @@ onUnmounted(() => {
 
         <!-- VOLET DROIT : UNIQUEMENT LE DESCRIPTIF DU PROJET (RÉVÉLÉ AU CLIC) -->
         <div
-          class="lg:col-span-5 h-full mt-4 lg:mt-0"
+          class="h-full min-w-0 mt-2 lg:mt-0"
           :class="{
             'hidden lg:block': mobileView === 'projects',
             'block': mobileView === 'data' || mobileView === 'both'
@@ -183,24 +182,24 @@ onUnmounted(() => {
       </div>
 
       <!-- Barre inférieure Pokédex 4G -->
-      <div class="px-6 py-3 bg-red-900/90 border-t-2 border-red-950 flex flex-wrap items-center justify-between text-xs text-red-200">
-        <div class="flex items-center gap-3">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="font-pixel text-[10px]">POKÉDEX 4G CONNECTÉ</span>
+      <div class="px-3 sm:px-4 py-1.5 bg-red-900/90 border-t-2 border-red-950 flex flex-wrap items-center justify-between text-[8px] sm:text-[9px] text-red-200">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="font-pixel text-[8px] sm:text-[9px]">POKÉDEX 4G CONNECTÉ</span>
         </div>
-        <div class="hidden sm:flex items-center gap-4 text-[11px] font-mono text-red-300">
-          <span>Navigation : Molette centrale ou ⬆️⬇️</span>
+        <div class="hidden sm:flex items-center gap-3 font-mono text-red-300 text-[9px] sm:text-[10px]">
+          <span>Navigation : Molette ou ⬆️⬇️</span>
           <span>Clic / Entrée : Ouvrir</span>
           <span>Échap : Fermer</span>
         </div>
-        <div class="text-[10px] font-pixel text-red-400">
+        <div class="text-[8px] sm:text-[9px] font-pixel text-red-400">
           © {{ new Date().getFullYear() }} {{ pokedexData.trainer.name }}
         </div>
       </div>
     </div>
 
     <!-- Note d'aide pour le recruteur sous le Pokédex -->
-    <div class="max-w-4xl mx-auto text-center mt-6 text-xs text-slate-400 space-y-1">
+    <div class="max-w-xl mx-auto text-center mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 space-y-0.5">
       <p>
         🔴 <strong class="text-slate-300">Style Pokédex 4G :</strong> Utilisez la molette centrale, la liste verticale ou votre clavier pour sélectionner un projet et afficher son descriptif.
       </p>

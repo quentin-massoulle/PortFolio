@@ -29,47 +29,47 @@ const handleClose = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-red-600 p-4 sm:p-5 rounded-2xl md:rounded-l-none border-4 border-red-800 shadow-2xl">
+  <div class="flex flex-col h-full bg-red-600 p-2 sm:p-3 rounded-xl md:rounded-l-none border-2 sm:border-3 border-red-800 shadow-xl">
     <!-- En-tête supérieur style Pokédex 4G (Sinnoh DS) -->
-    <div class="flex items-center justify-between mb-3 px-1">
-      <div class="flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full bg-sky-400 border border-slate-900 shadow-[0_0_6px_rgba(56,189,248,0.8)]"></span>
-        <h3 class="text-xs font-pixel text-slate-100 tracking-wider">
+    <div class="flex items-center justify-between mb-1 px-0.5">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-sky-400 border border-slate-900 shadow-[0_0_6px_rgba(56,189,248,0.8)]"></span>
+        <h3 class="text-[10px] font-pixel text-slate-100 tracking-wider">
           DESCRIPTIF DU PROJET
         </h3>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-[9px] font-pixel px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-slate-700">
+      <div class="flex items-center gap-1.5">
+        <span class="text-[8px] font-pixel px-1.5 py-0.2 rounded bg-slate-900 text-emerald-400 border border-slate-700">
           MODE: 4G SINNOH
         </span>
       </div>
     </div>
 
-    <!-- Écran LCD droit : Hauteur fixe et scroll interne sur le descriptif -->
-    <div class="flex-1 lcd-blue scanlines rounded-xl border-4 border-slate-950 p-3.5 sm:p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden h-[450px] max-h-[450px]">
+    <!-- Écran LCD droit : Hauteur compacte et scroll interne sur le descriptif -->
+    <div class="flex-1 lcd-blue scanlines rounded-md border-2 border-slate-950 p-2.5 sm:p-3 shadow-[inset_0_0_15px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden min-h-[235px] h-[270px] max-h-[270px]">
       
       <!-- ÉTAT 1 : AUCUN PROJET SÉLECTIONNÉ (EN ATTENTE DE CLIC) -->
       <div
         v-if="!isOpen || !selectedProject"
-        class="h-full rounded-xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden"
+        class="h-full rounded-lg p-3 flex flex-col items-center justify-center text-center relative overflow-hidden"
       >
         <!-- Grille radar d'attente -->
-        <div class="relative w-24 h-24 mb-4 rounded-full border-2 border-sky-500/40 flex items-center justify-center">
-          <div class="w-16 h-16 rounded-full border border-sky-400/60 animate-ping opacity-25"></div>
-          <div class="w-10 h-10 rounded-full bg-sky-500/20 border border-sky-400 flex items-center justify-center text-2xl">
+        <div class="relative w-16 h-16 mb-2 rounded-full border-2 border-sky-500/40 flex items-center justify-center">
+          <div class="w-11 h-11 rounded-full border border-sky-400/60 animate-ping opacity-25"></div>
+          <div class="w-8 h-8 rounded-full bg-sky-500/20 border border-sky-400 flex items-center justify-center text-xl">
             📡
           </div>
         </div>
 
-        <h4 class="text-sm font-bold font-pixel text-sky-300 mb-2 tracking-wide">
+        <h4 class="text-xs font-bold font-pixel text-sky-300 mb-1 tracking-wide">
           POKÉDEX 4G EN ATTENTE
         </h4>
-        <p class="text-xs text-slate-300 max-w-sm mb-4 leading-relaxed font-tech text-base">
+        <p class="text-[11px] text-slate-300 max-w-xs mb-2 leading-snug font-tech">
           Sélectionnez un projet dans la liste de gauche ou appuyez sur la <strong class="text-emerald-400">Pokéball centrale</strong> pour afficher son descriptif détaillé.
         </p>
 
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950/80 border border-slate-800 text-[10px] font-pixel text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-[8px] font-pixel text-slate-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>SYSTÈME DE SCAN ACTIF</span>
         </div>
       </div>
@@ -77,22 +77,22 @@ const handleClose = () => {
       <!-- ÉTAT 2 : FICHE DESCRIPTIVE COMPLÈTE AVEC SCROLL INTERNE -->
       <div
         v-else
-        class="h-full flex flex-col justify-between overflow-y-auto pokedex-scroll pr-1.5 animate-in fade-in duration-200"
+        class="h-full flex flex-col justify-between overflow-y-auto pokedex-scroll pr-1 animate-in fade-in duration-200"
       >
         <div>
           <!-- Ligne de titre : Numéro, Titre et Bouton Fermer -->
-          <div class="flex items-start justify-between border-b border-slate-800 pb-3 mb-3 gap-2">
+          <div class="flex items-start justify-between border-b border-slate-800 pb-1.5 mb-1.5 gap-2">
             <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-pixel text-emerald-400">{{ selectedProject.number }}</span>
-                <span class="px-2 py-0.5 rounded text-[9px] font-pixel bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <div class="flex items-center gap-1.5 mb-0.5">
+                <span class="text-[10px] font-pixel text-emerald-400">{{ selectedProject.number }}</span>
+                <span class="px-1.5 py-0.2 rounded text-[8px] font-pixel bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   {{ selectedProject.type }}
                 </span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                <span class="px-1.5 py-0.2 rounded text-[8px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
                   {{ selectedProject.category }}
                 </span>
               </div>
-              <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <h3 class="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5">
                 <span>{{ selectedProject.preview }}</span>
                 <span>{{ selectedProject.name }}</span>
               </h3>
@@ -101,7 +101,7 @@ const handleClose = () => {
             <!-- Bouton Fermer -->
             <button
               @click="handleClose"
-              class="px-2 py-1 rounded text-[10px] font-pixel bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition cursor-pointer"
+              class="px-1.5 py-0.5 rounded text-[8px] font-pixel bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition cursor-pointer shrink-0"
               title="Fermer le descriptif"
             >
               ✖ FERMER
@@ -109,44 +109,44 @@ const handleClose = () => {
           </div>
 
           <!-- Encadré descriptif Pokédex -->
-          <div class="bg-slate-950/85 p-3.5 rounded-lg border border-slate-800 mb-3 text-sm text-slate-200 leading-relaxed font-tech">
-            <p class="mb-2 text-base text-slate-100 font-medium">
+          <div class="bg-slate-950/85 p-2 rounded border border-slate-800 mb-2 text-xs text-slate-200 leading-snug font-tech">
+            <p class="mb-1 text-xs text-slate-100 font-medium">
               {{ selectedProject.summary }}
             </p>
-            <p class="text-xs text-slate-400 italic">
+            <p class="text-[10px] text-slate-400 italic">
               {{ selectedProject.details }}
             </p>
           </div>
 
           <!-- Points Clés & Réalisations -->
-          <div class="mb-3">
-            <h4 class="text-xs font-pixel text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div class="mb-2">
+            <h4 class="text-[9px] font-pixel text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               <span class="text-emerald-400">⚡</span>
               <span>RÉALISATIONS TECHNIQUES :</span>
             </h4>
-            <ul class="space-y-1.5 text-xs text-slate-300 font-tech">
+            <ul class="space-y-1 text-[11px] text-slate-300 font-tech">
               <li
                 v-for="(point, idx) in selectedProject.highlights"
                 :key="idx"
-                class="flex items-start gap-2 bg-slate-950/50 p-2 rounded border border-slate-800/70"
+                class="flex items-start gap-1.5 bg-slate-950/50 p-1.5 rounded border border-slate-800/70"
               >
-                <span class="text-emerald-400 font-bold">►</span>
+                <span class="text-emerald-400 font-bold shrink-0">►</span>
                 <span>{{ point }}</span>
               </li>
             </ul>
           </div>
 
           <!-- Stack technique -->
-          <div class="mb-4">
-            <h4 class="text-xs font-pixel text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div class="mb-2">
+            <h4 class="text-[9px] font-pixel text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               <span class="text-cyan-400">🛠️</span>
               <span>TECHNOLOGIES MOBILISÉES :</span>
             </h4>
-            <div class="flex flex-wrap gap-1.5">
+            <div class="flex flex-wrap gap-1">
               <span
                 v-for="tech in selectedProject.stack"
                 :key="tech"
-                class="px-2.5 py-1 rounded text-xs font-medium bg-slate-800/90 text-emerald-300 border border-slate-700"
+                class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800/90 text-emerald-300 border border-slate-700"
               >
                 #{{ tech }}
               </span>
@@ -155,32 +155,32 @@ const handleClose = () => {
         </div>
 
         <!-- Boutons d'action : Démo, GitHub & Contact direct pour les recruteurs -->
-        <div class="pt-3 border-t border-slate-800 space-y-2.5">
-          <div class="flex flex-wrap gap-2.5">
+        <div class="pt-2 border-t border-slate-800 space-y-1.5">
+          <div class="flex gap-2">
             <a
               :href="selectedProject.demoUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex-1 min-w-[130px] text-center px-4 py-2.5 rounded-lg text-xs font-pixel bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
+              class="flex-1 min-w-0 text-center px-2 py-1.5 rounded text-[9px] font-pixel bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition shadow truncate"
             >
-              🎮 LANCER LA DÉMO
+              🎮 DÉMO
             </a>
             <a
               :href="selectedProject.githubUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex-1 min-w-[130px] text-center px-4 py-2.5 rounded-lg text-xs font-pixel bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-600 transition"
+              class="flex-1 min-w-0 text-center px-2 py-1.5 rounded text-[9px] font-pixel bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-600 transition truncate"
             >
-              📂 CODE GITHUB
+              📂 GITHUB
             </a>
           </div>
 
           <!-- Liens rapides pour le recruteur -->
-          <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 bg-slate-950/60 px-3 py-1.5 rounded border border-slate-800">
+          <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 bg-slate-950/60 px-2 py-1 rounded border border-slate-800">
             <span>Dresseur : {{ trainer.name }}</span>
-            <div class="flex gap-3">
-              <a :href="trainer.cvUrl" download class="text-sky-400 hover:underline">📄 Télécharger CV</a>
-              <a :href="`mailto:${contact.email}`" class="text-emerald-400 hover:underline">✉️ Contacter</a>
+            <div class="flex gap-2">
+              <a :href="trainer.cvUrl" download class="text-sky-400 hover:underline">📄 CV</a>
+              <a :href="`mailto:${contact.email}`" class="text-emerald-400 hover:underline">✉️ Contact</a>
             </div>
           </div>
         </div>
@@ -188,14 +188,14 @@ const handleClose = () => {
     </div>
 
     <!-- Pied de l'écran droit style console 4G -->
-    <div class="mt-3 flex items-center justify-between px-1">
-      <div class="flex gap-2">
-        <div class="w-10 h-3 rounded bg-slate-900 border border-slate-700"></div>
-        <div class="w-10 h-3 rounded bg-slate-900 border border-slate-700"></div>
+    <div class="mt-1.5 flex items-center justify-between px-0.5">
+      <div class="flex gap-1.5">
+        <div class="w-8 h-2 rounded bg-slate-900 border border-slate-700"></div>
+        <div class="w-8 h-2 rounded bg-slate-900 border border-slate-700"></div>
       </div>
-      <div class="flex gap-2">
-        <div class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-900 shadow"></div>
-        <div class="w-3.5 h-3.5 rounded-full bg-slate-900 border border-slate-700 shadow"></div>
+      <div class="flex gap-1.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-900 shadow"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-700 shadow"></div>
       </div>
     </div>
   </div>
